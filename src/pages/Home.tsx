@@ -1,5 +1,5 @@
 // src/pages/Home.tsx
-import './home.css'
+import './style.css'
 import { useNavigate } from 'react-router-dom'
 import { Rocket,ArrowRight,CircleCheck } from 'lucide-react';
 function Home() {
