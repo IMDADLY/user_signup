@@ -1,11 +1,16 @@
 import './style.css'
-import { Rocket } from 'lucide-react';
+import { Rocket, AlertCircle} from 'lucide-react';
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react';
 
 type DataUsage = '0-50mb' | '50-250mb' | '250mb-1gb' | '1gb+' | null;
 
-const inputClass = 'w-full h-11 px-3 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition';
+const inputClass = (hasError: boolean) =>
+  `w-full h-11 px-3 pr-10 border rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+    hasError
+      ? 'border-red-400 focus:ring-red-400'
+      : 'border-gray-300 focus:ring-blue-500'
+  }`;
 const labelClass = 'block text-sm font-medium text-gray-700 mb-1.5';
 
 function SignUp() {
@@ -24,13 +29,34 @@ function SignUp() {
     { id: '1gb+',      label: '1 GB+'        },
   ];
 
-  const toggleOffers = () => setReceiveOffers((prev) => !prev);
 
+const [errors, setErrors] = useState({
+    firstName : '',
+    lastName  : '',
+    email     : '',
+    dataUsage : '',
+  });
+ 
+  const toggleOffers = () => setReceiveOffers((prev) => !prev);
+ 
+  // ── Validate and return true only if everything passes
+  const validate = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const newErrors = {
+      firstName : firstName.trim().length < 2   ? 'First name must be at least 2 characters' : '',
+      lastName  : lastName.trim().length < 2    ? 'Last name must be at least 2 characters'  : '',
+      email     : !emailRegex.test(email)        ? 'Invalid email address'                   : '',
+      dataUsage : !dataUsage                     ? 'Please select data usage'                : '',
+    };
+    setErrors(newErrors);
+    return Object.values(newErrors).every((e) => e === '');
+  };
+ 
   const handleSubmit = () => {
-    navigate('/dashboard', {
-      state: { firstName, lastName, email, dataUsage, promoCode }
-    });
-};
+    if (!validate()) return;          // stop if any field is invalid
+    navigate('/success', { state: { firstName, email } });
+  };
+
   const handleCancel = () => {
     setFirstName('');
     setLastName('');
@@ -76,23 +102,35 @@ function SignUp() {
                 <label className={labelClass}>
                   First Name
                 </label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className={inputClass}
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className={inputClass(!!errors.firstName)}
+                  />
+                  {errors.firstName && (
+        <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
+      )}
+                </div>
+                {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
               </div>
               <div>
                 <label className={labelClass}>
                   Last Name
                 </label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className={inputClass}
-                />
+                <div className="relative" >
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className={inputClass(!!errors.lastName)}
+                  />
+                  {errors.lastName && (
+                      <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
+                    )}
+                </div>
+                {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
               </div>
             </div>
 
@@ -100,12 +138,18 @@ function SignUp() {
               <label className={labelClass}>
                 Email Address
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setErrors((prev) => ({ ...prev, email: '' })); }}
+                  className={inputClass(!!errors.email)}
+                />
+                {errors.email && (
+                    <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
+                  )}
+              </div>
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
           </section>
 
@@ -142,6 +186,7 @@ function SignUp() {
                   </button>
                 ))}
               </div>
+              {errors.dataUsage && <p className="text-red-500 text-xs mt-2">{errors.dataUsage}</p>}
             </div>
 
             {/* Promo Code */}
@@ -153,7 +198,7 @@ function SignUp() {
                 type="text"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
-                className={inputClass}
+                className={inputClass(false)}
               />
             </div>
 

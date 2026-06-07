@@ -5,6 +5,8 @@ import { Rocket, ArrowRight, CircleCheck, LogOut } from "lucide-react";
 function Dashboard() {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const firstName = state.firstName;
+  const email = state.email;
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
@@ -17,10 +19,12 @@ function Dashboard() {
           <span className="font-bold text-gray-900 text-lg">Awesome App</span>
         </div>
 
-        {/* Sign Up Button */}
+        {/* Log out button */}
         <div className="flex items-center gap-4 ml-auto mr-20">
-        <span className="font-bold text-gray-900 text-md">HI Imdad</span>
-            <button className="border border-gray-400 flex items-center gap-2 bg-white hover:bg-gray-200 text-gray-700 font-semibold px-5 py-2 rounded-xl transition-colors text-xs">
+            <span className="font-light text-gray-500 text-sm">
+                Hi, {firstName}
+            </span>
+            <button className="border border-gray-400 flex items-center gap-2 bg-white hover:bg-gray-200 text-gray-500 font-semibold px-5 py-2 rounded-xl transition-colors text-xs">
                 <LogOut color="gray" />
                 Logout
             </button>
@@ -46,7 +50,7 @@ function Dashboard() {
 
         {/* CTA Button */}
         <button
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate('/success', { state: { firstName, email } })}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-sm transition-colors mb-12 shadow-lg shadow-blue-200"
         >
           Get started
